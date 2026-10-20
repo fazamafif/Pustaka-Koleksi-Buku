@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kategori · Pustaka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1ECDC; --paper-2:#FBF8F0; --ink:#1B2A22; --ink-soft:#5A6A5F;
+    --forest:#1F4438; --forest-2:#2E5C4A; --forest-dark:#12271F;
+    --brass:#B8862E; --brass-light:#D9AE5F; --burgundy:#7C2D2D; --line:#D9CFB4;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter',sans-serif; background:var(--paper); color:var(--ink);}
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit; cursor:pointer;}
+
+  .app-shell{display:flex; min-height:100vh;}
+  .sidebar{
+    width:236px; flex-shrink:0;
+    background:linear-gradient(180deg, var(--forest-dark), var(--forest));
+    color:var(--paper-2); display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh;
+  }
+  .sidebar .brand{
+    padding:26px 24px 20px; font-family:'Fraunces',serif; font-weight:700; font-size:22px;
+    border-bottom:1px solid rgba(251,248,240,0.12); display:flex; align-items:baseline; gap:8px;
+  }
+  .sidebar .brand .code-tag{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--brass-light);
+    border:1px solid rgba(217,174,95,0.5); padding:1px 5px; border-radius:2px;
+  }
+  .sidebar nav{padding:20px 12px; flex:1;}
+  .nav-item{
+    display:flex; align-items:center; gap:12px; padding:11px 14px; margin-bottom:4px;
+    border-radius:2px; font-size:14px; font-weight:500; color:rgba(251,248,240,0.72);
+    border-left:3px solid transparent; transition:all .15s ease;
+  }
+  .nav-item .code{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--brass-light); width:20px;}
+  .nav-item:hover{background:rgba(251,248,240,0.06); color:var(--paper-2);}
+  .nav-item.active{background:rgba(184,134,46,0.18); border-left-color:var(--brass-light); color:var(--paper-2);}
+  .sidebar .logout{padding:16px 24px; border-top:1px solid rgba(251,248,240,0.12); font-size:13px; color:rgba(251,248,240,0.6); display:flex; align-items:center; gap:8px;}
+  .sidebar .logout:hover{color:var(--paper-2);}
+
+  .main{flex:1; min-width:0;}
+  .topbar{
+    background:var(--paper-2); border-bottom:1px solid var(--line); padding:20px 36px;
+    display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5;
+  }
+  .breadcrumb{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.1em; color:var(--ink-soft); text-transform:uppercase;}
+  .breadcrumb span{color:var(--brass);}
+  .topbar h2{font-family:'Fraunces',serif; font-weight:600; font-size:24px; margin-top:2px;}
+  .btn-add{
+    background:var(--forest); color:var(--paper-2); border:none; padding:11px 18px;
+    font-weight:600; font-size:13px; border-radius:2px; display:flex; align-items:center; gap:8px;
+    transition:background .15s ease;
+  }
+  .btn-add:hover{background:var(--forest-2);}
+
+  .content{padding:32px 36px 60px;}
+
+  .card{position:relative; background:var(--paper-2); border:1px solid var(--line);}
+  .card::after{
+    content:""; position:absolute; top:-1px; right:-1px; width:16px; height:16px;
+    background:var(--paper); clip-path:polygon(100% 0,0 0,100% 100%);
+    border-left:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+
+  .cat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:18px;}
+  .cat-card{padding:0; overflow:hidden;}
+  .cat-top{height:7px;}
+  .cat-body{padding:20px 20px 18px;}
+  .cat-code{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--brass);
+    letter-spacing:0.08em; display:block; margin-bottom:10px;
+  }
+  .cat-body h3{font-family:'Fraunces',serif; font-weight:600; font-size:19px; margin-bottom:6px;}
+  .cat-body p{font-size:12.5px; color:var(--ink-soft); line-height:1.5; margin-bottom:16px;}
+  .cat-foot{display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--line); padding-top:14px;}
+  .cat-count{font-size:13px;}
+  .cat-count b{font-family:'Fraunces',serif; font-size:17px;}
+  .cat-actions{display:flex; gap:8px;}
+  .icon-btn{
+    width:28px; height:28px; border:1px solid var(--line); background:var(--paper);
+    border-radius:2px; display:flex; align-items:center; justify-content:center;
+    font-size:13px; color:var(--ink-soft); transition:all .15s ease;
+  }
+  .icon-btn:hover{border-color:var(--brass); color:var(--brass);}
+  .icon-btn.danger:hover{border-color:var(--burgundy); color:var(--burgundy);}
+
+  /* Modal */
+  .overlay{
+    display:none; position:fixed; inset:0; background:rgba(18,39,31,0.55);
+    align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    width:100%; max-width:440px; background:var(--paper-2); border:1px solid var(--line); position:relative; padding:30px 30px 26px;
+  }
+  .modal::after{
+    content:""; position:absolute; top:-1px; right:-1px; width:20px; height:20px;
+    background:var(--paper); clip-path:polygon(100% 0,0 0,100% 100%);
+    border-left:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  .modal-tag{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--brass); letter-spacing:0.08em;}
+  .modal h3{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:8px 0 22px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:11.5px; font-weight:600; letter-spacing:0.03em; color:var(--ink-soft); margin-bottom:6px; text-transform:uppercase;}
+  .field input, .field textarea{
+    width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--paper);
+    font-family:'Inter',sans-serif; font-size:14px; color:var(--ink); border-radius:2px; outline:none;
+  }
+  .field input:focus, .field textarea:focus{border-color:var(--brass);}
+  .swatches{display:flex; gap:8px; flex-wrap:wrap;}
+  .swatch{width:26px; height:26px; border-radius:50%; cursor:pointer; border:2px solid transparent;}
+  .swatch.selected{border-color:var(--ink);}
+  .modal-actions{display:flex; gap:10px; margin-top:22px;}
+  .btn-primary{flex:1; background:var(--forest); color:var(--paper-2); border:none; padding:12px; font-weight:600; font-size:13.5px; border-radius:2px;}
+  .btn-primary:hover{background:var(--forest-2);}
+  .btn-ghost{flex:1; background:transparent; color:var(--ink-soft); border:1px solid var(--line); padding:12px; font-weight:600; font-size:13.5px; border-radius:2px;}
+  .btn-ghost:hover{border-color:var(--ink-soft); color:var(--ink);}
+
+  @media(max-width:720px){ .sidebar{display:none;} }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">Pustaka</div>
+    <nav>
+      <a class="nav-item" href="dashboard.html"><span class="code">00</span>Dashboard</a>
+      <a class="nav-item active" href="kategori.html"><span class="code">01</span>Kategori</a>
+      <a class="nav-item" href="penerbit.html"><span class="code">02</span>Penerbit</a>
+      <a class="nav-item" href="buku.html"><span class="code">03</span>Buku</a>
+    </nav>
+    <a class="logout" href="login.html">← Keluar</a>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="breadcrumb">PUSTAKA / <span>KATEGORI</span></div>
+        <h2>Kategori Buku</h2>
+      </div>
+      <button class="btn-add" onclick="document.getElementById('modalKategori').classList.add('show')">+ Tambah Kategori</button>
+    </div>
+
+    <div class="content">
+      <div class="cat-grid">
+        <div class="card cat-card">
+          <div class="cat-top" style="background:#7C2D2D"></div>
+          <div class="cat-body">
+            <span class="cat-code">RAK 01 · FIC</span>
+            <h3>Fiksi</h3>
+            <p>Novel, cerpen, dan karya sastra naratif dari penulis lokal & internasional.</p>
+            <div class="cat-foot">
+              <div class="cat-count"><b>386</b> judul</div>
+              <div class="cat-actions">
+                <button class="icon-btn">✎</button>
+                <button class="icon-btn danger">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card cat-card">
+          <div class="cat-top" style="background:#2E5C4A"></div>
+          <div class="cat-body">
+            <span class="cat-code">RAK 02 · NF</span>
+            <h3>Non-Fiksi</h3>
+            <p>Esai, jurnalisme, dan tulisan berbasis fakta di luar kategori khusus lain.</p>
+            <div class="cat-foot">
+              <div class="cat-count"><b>271</b> judul</div>
+              <div class="cat-actions">
+                <button class="icon-btn">✎</button>
+                <button class="icon-btn danger">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card cat-card">
+          <div class="cat-top" style="background:#2B4A66"></div>
+          <div class="cat-body">
+            <span class="cat-code">RAK 03 · SCI</span>
+            <h3>Sains & Teknologi</h3>
+            <p>Buku ilmu pengetahuan alam, komputer, dan perkembangan teknologi terkini.</p>
+            <div class="cat-foot">
+              <div class="cat-count"><b>198</b> judul</div>
+              <div class="cat-actions">
+                <button class="icon-btn">✎</button>
+                <button class="icon-btn danger">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card cat-card">
+          <div class="cat-top" style="background:#8A6A2E"></div>
+          <div class="cat-body">
+            <span class="cat-code">RAK 04 · HIS</span>
+            <h3>Sejarah</h3>
+            <p>Catatan peristiwa, tokoh, dan peradaban dari masa ke masa.</p>
+            <div class="cat-foot">
+              <div class="cat-count"><b>154</b> judul</div>
+              <div class="cat-actions">
+                <button class="icon-btn">✎</button>
+                <button class="icon-btn danger">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card cat-card">
+          <div class="cat-top" style="background:#B15A3A"></div>
+          <div class="cat-body">
+            <span class="cat-code">RAK 05 · KID</span>
+            <h3>Anak & Remaja</h3>
+            <p>Bacaan bergambar, dongeng, dan novel remaja untuk pembaca muda.</p>
+            <div class="cat-foot">
+              <div class="cat-count"><b>140</b> judul</div>
+              <div class="cat-actions">
+                <button class="icon-btn">✎</button>
+                <button class="icon-btn danger">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card cat-card">
+          <div class="cat-top" style="background:#5B3A5C"></div>
+          <div class="cat-body">
+            <span class="cat-code">RAK 06 · BIO</span>
+            <h3>Biografi</h3>
+            <p>Kisah hidup tokoh publik, memoar, dan autobiografi.</p>
+            <div class="cat-foot">
+              <div class="cat-count"><b>135</b> judul</div>
+              <div class="cat-actions">
+                <button class="icon-btn">✎</button>
+                <button class="icon-btn danger">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" id="modalKategori">
+  <div class="modal">
+    <span class="modal-tag">KARTU BARU · 01</span>
+    <h3>Tambah Kategori</h3>
+    <form onsubmit="return false;">
+      <div class="field">
+        <label>Nama Kategori</label>
+        <input type="text" placeholder="mis. Filsafat">
+      </div>
+      <div class="field">
+        <label>Kode Rak</label>
+        <input type="text" placeholder="mis. RAK 07 · PHI">
+      </div>
+      <div class="field">
+        <label>Deskripsi Singkat</label>
+        <textarea rows="3" placeholder="Deskripsi kategori..."></textarea>
+      </div>
+      <div class="field">
+        <label>Warna Punggung Buku</label>
+        <div class="swatches">
+          <span class="swatch selected" style="background:#7C2D2D"></span>
+          <span class="swatch" style="background:#2E5C4A"></span>
+          <span class="swatch" style="background:#2B4A66"></span>
+          <span class="swatch" style="background:#8A6A2E"></span>
+          <span class="swatch" style="background:#B15A3A"></span>
+          <span class="swatch" style="background:#5B3A5C"></span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="document.getElementById('modalKategori').classList.remove('show')">Batal</button>
+        <button type="submit" class="btn-primary">Simpan Kategori</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.swatch').forEach(s=>{
+    s.addEventListener('click',()=>{
+      document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('selected'));
+      s.classList.add('selected');
+    });
+  });
+  document.getElementById('modalKategori').addEventListener('click', e=>{
+    if(e.target.id==='modalKategori') e.target.classList.remove('show');
+  });
+</script>
+</body>
+</html>

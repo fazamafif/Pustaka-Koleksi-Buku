@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masuk · Pustaka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1ECDC;
+    --paper-2:#FBF8F0;
+    --ink:#1B2A22;
+    --ink-soft:#4B5A50;
+    --forest:#1F4438;
+    --forest-2:#2E5C4A;
+    --forest-dark:#12271F;
+    --brass:#B8862E;
+    --brass-light:#D9AE5F;
+    --burgundy:#7C2D2D;
+    --line:#D9CFB4;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+  }
+  .shell{display:flex; width:100%; min-height:100vh;}
+
+  /* Left: catalog drawers panel */
+  .catalog-panel{
+    flex:1.1;
+    background:linear-gradient(160deg, var(--forest-dark), var(--forest) 60%, var(--forest-2));
+    color:var(--paper-2);
+    padding:56px 56px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    position:relative;
+    overflow:hidden;
+  }
+  .catalog-panel .brandmark{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:28px;
+    letter-spacing:0.02em;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .brandmark .code-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--brass-light);
+    border:1px solid rgba(217,174,95,0.5);
+    padding:2px 6px;
+    border-radius:2px;
+    letter-spacing:0.08em;
+  }
+  .drawers{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin:48px 0;
+  }
+  .drawer{
+    background:rgba(251,248,240,0.05);
+    border:1px solid rgba(251,248,240,0.14);
+    border-radius:3px;
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    transition:all .2s ease;
+  }
+  .drawer .label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.1em;
+    color:rgba(251,248,240,0.55);
+  }
+  .drawer .pull{
+    width:26px; height:8px;
+    background:var(--brass-light);
+    border-radius:4px;
+    opacity:0.7;
+  }
+  .drawer.open{
+    background:rgba(184,134,46,0.16);
+    border-color:rgba(217,174,95,0.55);
+    transform:translateX(10px);
+  }
+  .drawer.open .label{color:var(--brass-light);}
+  .drawer.open .pull{opacity:1; box-shadow:0 0 12px var(--brass-light);}
+
+  .catalog-panel .tagline{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:20px;
+    line-height:1.5;
+    max-width:380px;
+    color:var(--paper-2);
+  }
+  .catalog-panel .foot{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:rgba(251,248,240,0.45);
+    letter-spacing:0.06em;
+  }
+
+  /* Right: index card form */
+  .form-panel{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:48px;
+  }
+  .index-card{
+    width:100%;
+    max-width:400px;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    position:relative;
+    padding:40px 36px 36px;
+  }
+  .index-card::after{
+    content:"";
+    position:absolute; top:-1px; right:-1px;
+    width:22px; height:22px;
+    background:var(--paper);
+    clip-path:polygon(100% 0,0 0,100% 100%);
+    border-left:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .card-tab{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    color:var(--brass);
+    border-bottom:2px solid var(--brass);
+    display:inline-block;
+    padding-bottom:4px;
+    margin-bottom:22px;
+  }
+  .index-card h1{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:32px;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  .index-card .sub{
+    color:var(--ink-soft);
+    font-size:14px;
+    margin-bottom:30px;
+  }
+  .field{margin-bottom:18px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    text-transform:uppercase;
+  }
+  .field input{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    color:var(--ink);
+    border-radius:2px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .field input:focus{border-color:var(--brass);}
+  .ruled{
+    background-image:repeating-linear-gradient(transparent, transparent 27px, var(--line) 28px);
+  }
+  .row-between{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13px; color:var(--ink-soft); margin-bottom:26px;
+  }
+  .row-between label{display:flex; align-items:center; gap:6px; cursor:pointer;}
+  .row-between a{color:var(--burgundy); text-decoration:none; font-weight:500;}
+  .row-between a:hover{text-decoration:underline;}
+  .btn-primary{
+    width:100%;
+    background:var(--forest);
+    color:var(--paper-2);
+    border:none;
+    padding:13px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.02em;
+    border-radius:2px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .btn-primary:hover{background:var(--forest-2);}
+  .hint{
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:20px;
+  }
+  .hint a{color:var(--brass); text-decoration:none; font-weight:600;}
+
+  @media(max-width:860px){
+    .shell{flex-direction:column;}
+    .catalog-panel{padding:40px 32px;}
+    .drawers{margin:28px 0;}
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <section class="catalog-panel">
+      <div>
+        <div class="brandmark">Pustaka</div>
+        <div class="drawers">
+          <div class="drawer"><span class="label">A — D</span><span class="pull"></span></div>
+          <div class="drawer"><span class="label">E — H</span><span class="pull"></span></div>
+          <div class="drawer open"><span class="label">I — L · Login</span><span class="pull"></span></div>
+          <div class="drawer"><span class="label">M — P</span><span class="pull"></span></div>
+          <div class="drawer"><span class="label">Q — T</span><span class="pull"></span></div>
+        </div>
+        <p class="tagline">"Setiap buku punya tempatnya. Masuk untuk membuka laci katalog Anda."</p>
+      </div>
+      <div class="foot">SISTEM MANAJEMEN DATA BUKU &nbsp;·&nbsp; PERPUSTAKAAN DIGITAL</div>
+    </section>
+
+    <section class="form-panel">
+      <div class="index-card">
+        <div class="card-tab">KARTU AKSES · No. 001</div>
+        <h1>Pustaka</h1>
+        <p class="sub">Masuk untuk mengelola kategori, penerbit, dan koleksi buku.</p>
+        <form onsubmit="return false;">
+          <div class="field">
+            <label for="username">Nama Pengguna</label>
+            <input class="ruled" id="username" type="text" placeholder="mis. admin.perpustakaan" autocomplete="username">
+          </div>
+          <div class="field">
+            <label for="password">Kata Sandi</label>
+            <input class="ruled" id="password" type="password" placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <div class="row-between">
+            <label><input type="checkbox"> Ingat saya</label>
+            <a href="#">Lupa sandi?</a>
+          </div>
+          <button class="btn-primary" type="submit" onclick="window.location.href='dashboard.html'">Masuk ke Katalog</button>
+        </form>
+        <p class="hint">Belum punya akun? <a href="#">Hubungi admin perpustakaan</a></p>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

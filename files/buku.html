@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buku · Pustaka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1ECDC; --paper-2:#FBF8F0; --ink:#1B2A22; --ink-soft:#5A6A5F;
+    --forest:#1F4438; --forest-2:#2E5C4A; --forest-dark:#12271F;
+    --brass:#B8862E; --brass-light:#D9AE5F; --burgundy:#7C2D2D; --line:#D9CFB4;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter',sans-serif; background:var(--paper); color:var(--ink);}
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit; cursor:pointer;}
+
+  .app-shell{display:flex; min-height:100vh;}
+  .sidebar{
+    width:236px; flex-shrink:0;
+    background:linear-gradient(180deg, var(--forest-dark), var(--forest));
+    color:var(--paper-2); display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh;
+  }
+  .sidebar .brand{
+    padding:26px 24px 20px; font-family:'Fraunces',serif; font-weight:700; font-size:22px;
+    border-bottom:1px solid rgba(251,248,240,0.12); display:flex; align-items:baseline; gap:8px;
+  }
+  .sidebar .brand .code-tag{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--brass-light);
+    border:1px solid rgba(217,174,95,0.5); padding:1px 5px; border-radius:2px;
+  }
+  .sidebar nav{padding:20px 12px; flex:1;}
+  .nav-item{
+    display:flex; align-items:center; gap:12px; padding:11px 14px; margin-bottom:4px;
+    border-radius:2px; font-size:14px; font-weight:500; color:rgba(251,248,240,0.72);
+    border-left:3px solid transparent; transition:all .15s ease;
+  }
+  .nav-item .code{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--brass-light); width:20px;}
+  .nav-item:hover{background:rgba(251,248,240,0.06); color:var(--paper-2);}
+  .nav-item.active{background:rgba(184,134,46,0.18); border-left-color:var(--brass-light); color:var(--paper-2);}
+  .sidebar .logout{padding:16px 24px; border-top:1px solid rgba(251,248,240,0.12); font-size:13px; color:rgba(251,248,240,0.6); display:flex; align-items:center; gap:8px;}
+  .sidebar .logout:hover{color:var(--paper-2);}
+
+  .main{flex:1; min-width:0;}
+  .topbar{
+    background:var(--paper-2); border-bottom:1px solid var(--line); padding:20px 36px;
+    display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5;
+  }
+  .breadcrumb{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.1em; color:var(--ink-soft); text-transform:uppercase;}
+  .breadcrumb span{color:var(--brass);}
+  .topbar h2{font-family:'Fraunces',serif; font-weight:600; font-size:24px; margin-top:2px;}
+  .btn-add{
+    background:var(--forest); color:var(--paper-2); border:none; padding:11px 18px;
+    font-weight:600; font-size:13px; border-radius:2px; transition:background .15s ease;
+  }
+  .btn-add:hover{background:var(--forest-2);}
+
+  .content{padding:32px 36px 60px;}
+
+  .card{position:relative; background:var(--paper-2); border:1px solid var(--line);}
+  .card::after{
+    content:""; position:absolute; top:-1px; right:-1px; width:16px; height:16px;
+    background:var(--paper); clip-path:polygon(100% 0,0 0,100% 100%);
+    border-left:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+
+  .filter-tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;}
+  .filter-tab{
+    padding:8px 14px; border:1px solid var(--line); background:var(--paper-2); border-radius:20px;
+    font-size:12.5px; font-weight:500; color:var(--ink-soft);
+  }
+  .filter-tab.active{background:var(--forest); border-color:var(--forest); color:var(--paper-2);}
+
+  .toolbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
+  .search{position:relative; width:300px;}
+  .search input{
+    width:100%; padding:10px 12px 10px 34px; border:1px solid var(--line); background:var(--paper-2);
+    font-size:13.5px; border-radius:2px; outline:none;
+  }
+  .search input:focus{border-color:var(--brass);}
+  .search::before{content:"⌕"; position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--ink-soft);}
+  .count-tag{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft);}
+
+  table{width:100%; border-collapse:collapse;}
+  thead th{
+    text-align:left; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--brass); padding:14px 16px; border-bottom:2px solid var(--line);
+    white-space:nowrap;
+  }
+  tbody td{padding:14px 16px; border-bottom:1px solid var(--line); font-size:13.5px; vertical-align:middle;}
+  tbody tr:hover{background:rgba(184,134,46,0.05);}
+  tbody tr.low-stock td{background:rgba(124,45,45,0.04);}
+
+  .callno{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--brass); white-space:nowrap;}
+  .spine-swatch{width:8px; height:36px; border-radius:1px; display:inline-block;}
+  .book-title{font-weight:600; font-family:'Fraunces',serif; font-size:14.5px;}
+  .book-author{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+  .badge{
+    display:inline-block; padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:600;
+    color:#fff; white-space:nowrap;
+  }
+  .stok-val{font-family:'IBM Plex Mono',monospace; font-weight:600;}
+  .stok-val.low{color:var(--burgundy);}
+  .row-actions{display:flex; gap:8px;}
+  .icon-btn{
+    width:28px; height:28px; border:1px solid var(--line); background:var(--paper);
+    border-radius:2px; display:flex; align-items:center; justify-content:center;
+    font-size:13px; color:var(--ink-soft); transition:all .15s ease;
+  }
+  .icon-btn:hover{border-color:var(--brass); color:var(--brass);}
+  .icon-btn.danger:hover{border-color:var(--burgundy); color:var(--burgundy);}
+
+  .overlay{
+    display:none; position:fixed; inset:0; background:rgba(18,39,31,0.55);
+    align-items:center; justify-content:center; z-index:50; padding:20px; overflow-y:auto;
+  }
+  .overlay.show{display:flex;}
+  .modal{width:100%; max-width:560px; background:var(--paper-2); border:1px solid var(--line); position:relative; padding:32px 32px 26px; margin:auto;}
+  .modal::after{
+    content:""; position:absolute; top:-1px; right:-1px; width:20px; height:20px;
+    background:var(--paper); clip-path:polygon(100% 0,0 0,100% 100%);
+    border-left:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  .modal-tag{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--brass); letter-spacing:0.08em;}
+  .modal h3{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:8px 0 22px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .field-row.three{grid-template-columns:1fr 1fr 1fr;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:11.5px; font-weight:600; letter-spacing:0.03em; color:var(--ink-soft); margin-bottom:6px; text-transform:uppercase;}
+  .field input, .field select, .field textarea{
+    width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--paper);
+    font-family:'Inter',sans-serif; font-size:14px; color:var(--ink); border-radius:2px; outline:none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--brass);}
+  .modal-actions{display:flex; gap:10px; margin-top:22px;}
+  .btn-primary{flex:1; background:var(--forest); color:var(--paper-2); border:none; padding:12px; font-weight:600; font-size:13.5px; border-radius:2px;}
+  .btn-primary:hover{background:var(--forest-2);}
+  .btn-ghost{flex:1; background:transparent; color:var(--ink-soft); border:1px solid var(--line); padding:12px; font-weight:600; font-size:13.5px; border-radius:2px;}
+  .btn-ghost:hover{border-color:var(--ink-soft); color:var(--ink);}
+
+  @media(max-width:900px){ .sidebar{display:none;} table{font-size:12px;} .field-row, .field-row.three{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">Pustaka</div>
+    <nav>
+      <a class="nav-item" href="dashboard.html"><span class="code">00</span>Dashboard</a>
+      <a class="nav-item" href="kategori.html"><span class="code">01</span>Kategori</a>
+      <a class="nav-item" href="penerbit.html"><span class="code">02</span>Penerbit</a>
+      <a class="nav-item active" href="buku.html"><span class="code">03</span>Buku</a>
+    </nav>
+    <a class="logout" href="login.html">← Keluar</a>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="breadcrumb">PUSTAKA / <span>BUKU</span></div>
+        <h2>Koleksi Buku</h2>
+      </div>
+      <button class="btn-add" onclick="document.getElementById('modalBuku').classList.add('show')">+ Tambah Buku</button>
+    </div>
+
+    <div class="content">
+      <div class="filter-tabs">
+        <button class="filter-tab active">Semua</button>
+        <button class="filter-tab">Fiksi</button>
+        <button class="filter-tab">Non-Fiksi</button>
+        <button class="filter-tab">Sains & Teknologi</button>
+        <button class="filter-tab">Sejarah</button>
+        <button class="filter-tab">Anak & Remaja</button>
+        <button class="filter-tab">Biografi</button>
+      </div>
+
+      <div class="card" style="padding:22px 24px 6px;">
+        <div class="toolbar">
+          <div class="search"><input type="text" placeholder="Cari judul atau penulis..." id="searchInput"></div>
+          <span class="count-tag">1.284 buku terdaftar</span>
+        </div>
+
+        <table id="bookTable">
+          <thead>
+            <tr>
+              <th>No. Panggil</th>
+              <th></th>
+              <th>Judul & Penulis</th>
+              <th>Kategori</th>
+              <th>Penerbit</th>
+              <th>Tahun</th>
+              <th>Stok</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="callno">899.221<br>AND</td>
+              <td><span class="spine-swatch" style="background:#7C2D2D"></span></td>
+              <td>
+                <div class="book-title">Laut Bercerita</div>
+                <div class="book-author">Leila S. Chudori</div>
+              </td>
+              <td><span class="badge" style="background:#7C2D2D">Fiksi</span></td>
+              <td>Kepustakaan Populer Gramedia</td>
+              <td>2017</td>
+              <td><span class="stok-val">24</span></td>
+              <td class="row-actions"><button class="icon-btn">✎</button><button class="icon-btn danger">✕</button></td>
+            </tr>
+            <tr>
+              <td class="callno">170<br>MAN</td>
+              <td><span class="spine-swatch" style="background:#2E5C4A"></span></td>
+              <td>
+                <div class="book-title">Filosofi Teras</div>
+                <div class="book-author">Henry Manampiring</div>
+              </td>
+              <td><span class="badge" style="background:#2E5C4A">Non-Fiksi</span></td>
+              <td>Penerbit Kompas</td>
+              <td>2018</td>
+              <td><span class="stok-val">17</span></td>
+              <td class="row-actions"><button class="icon-btn">✎</button><button class="icon-btn danger">✕</button></td>
+            </tr>
+            <tr class="low-stock">
+              <td class="callno">899.221<br>LIY</td>
+              <td><span class="spine-swatch" style="background:#7C2D2D"></span></td>
+              <td>
+                <div class="book-title">Negeri Para Bedebah</div>
+                <div class="book-author">Tere Liye</div>
+              </td>
+              <td><span class="badge" style="background:#7C2D2D">Fiksi</span></td>
+              <td>Gramedia Pustaka Utama</td>
+              <td>2012</td>
+              <td><span class="stok-val low">3</span></td>
+              <td class="row-actions"><button class="icon-btn">✎</button><button class="icon-btn danger">✕</button></td>
+            </tr>
+            <tr>
+              <td class="callno">909<br>HAR</td>
+              <td><span class="spine-swatch" style="background:#8A6A2E"></span></td>
+              <td>
+                <div class="book-title">Sapiens: Riwayat Singkat Umat Manusia</div>
+                <div class="book-author">Yuval Noah Harari</div>
+              </td>
+              <td><span class="badge" style="background:#8A6A2E">Sejarah</span></td>
+              <td>Pustaka Alvabet</td>
+              <td>2017</td>
+              <td><span class="stok-val">31</span></td>
+              <td class="row-actions"><button class="icon-btn">✎</button><button class="icon-btn danger">✕</button></td>
+            </tr>
+            <tr>
+              <td class="callno">158.1<br>CLE</td>
+              <td><span class="spine-swatch" style="background:#2B4A66"></span></td>
+              <td>
+                <div class="book-title">Atomic Habits</div>
+                <div class="book-author">James Clear</div>
+              </td>
+              <td><span class="badge" style="background:#2B4A66">Sains & Teknologi</span></td>
+              <td>Gramedia Pustaka Utama</td>
+              <td>2019</td>
+              <td><span class="stok-val">45</span></td>
+              <td class="row-actions"><button class="icon-btn">✎</button><button class="icon-btn danger">✕</button></td>
+            </tr>
+            <tr class="low-stock">
+              <td class="callno">B<br>OBA</td>
+              <td><span class="spine-swatch" style="background:#5B3A5C"></span></td>
+              <td>
+                <div class="book-title">Becoming</div>
+                <div class="book-author">Michelle Obama</div>
+              </td>
+              <td><span class="badge" style="background:#5B3A5C">Biografi</span></td>
+              <td>Noura Books</td>
+              <td>2018</td>
+              <td><span class="stok-val low">2</span></td>
+              <td class="row-actions"><button class="icon-btn">✎</button><button class="icon-btn danger">✕</button></td>
+            </tr>
+            <tr>
+              <td class="callno">813<br>AND</td>
+              <td><span class="spine-swatch" style="background:#B15A3A"></span></td>
+              <td>
+                <div class="book-title">Si Anak Kampung</div>
+                <div class="book-author">Tere Liye</div>
+              </td>
+              <td><span class="badge" style="background:#B15A3A">Anak & Remaja</span></td>
+              <td>Republika Penerbit</td>
+              <td>2018</td>
+              <td><span class="stok-val">28</span></td>
+              <td class="row-actions"><button class="icon-btn">✎</button><button class="icon-btn danger">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" id="modalBuku">
+  <div class="modal">
+    <span class="modal-tag">KARTU BARU · 03</span>
+    <h3>Tambah Buku</h3>
+    <form onsubmit="return false;">
+      <div class="field">
+        <label>Judul Buku</label>
+        <input type="text" placeholder="mis. Bumi Manusia">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Penulis</label>
+          <input type="text" placeholder="mis. Pramoedya Ananta Toer">
+        </div>
+        <div class="field">
+          <label>ISBN</label>
+          <input type="text" placeholder="mis. 978-602-XXXX-XX">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Kategori</label>
+          <select>
+            <option>Fiksi</option>
+            <option>Non-Fiksi</option>
+            <option>Sains & Teknologi</option>
+            <option>Sejarah</option>
+            <option>Anak & Remaja</option>
+            <option>Biografi</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Penerbit</label>
+          <select>
+            <option>Gramedia Pustaka Utama</option>
+            <option>Mizan Pustaka</option>
+            <option>Kepustakaan Populer Gramedia</option>
+            <option>Bentang Pustaka</option>
+            <option>Pustaka Alvabet</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row three">
+        <div class="field">
+          <label>Tahun Terbit</label>
+          <input type="text" placeholder="2024">
+        </div>
+        <div class="field">
+          <label>No. Panggil</label>
+          <input type="text" placeholder="899.221/BUM">
+        </div>
+        <div class="field">
+          <label>Stok</label>
+          <input type="text" placeholder="10">
+        </div>
+      </div>
+      <div class="field">
+        <label>Deskripsi Singkat</label>
+        <textarea rows="3" placeholder="Ringkasan singkat isi buku..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" onclick="document.getElementById('modalBuku').classList.remove('show')">Batal</button>
+        <button type="submit" class="btn-primary">Simpan Buku</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById('searchInput').addEventListener('input', function(){
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#bookTable tbody tr').forEach(row=>{
+      const title = row.querySelector('.book-title').textContent.toLowerCase();
+      const author = row.querySelector('.book-author').textContent.toLowerCase();
+      row.style.display = (title.includes(q) || author.includes(q)) ? '' : 'none';
+    });
+  });
+  document.querySelectorAll('.filter-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const cat = tab.textContent.trim();
+      document.querySelectorAll('#bookTable tbody tr').forEach(row=>{
+        if(cat === 'Semua'){ row.style.display=''; return; }
+        const badge = row.querySelector('.badge').textContent.trim();
+        row.style.display = (badge === cat) ? '' : 'none';
+      });
+    });
+  });
+  document.getElementById('modalBuku').addEventListener('click', e=>{
+    if(e.target.id==='modalBuku') e.target.classList.remove('show');
+  });
+</script>
+</body>
+</html>
